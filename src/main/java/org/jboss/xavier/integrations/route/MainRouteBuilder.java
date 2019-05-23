@@ -20,6 +20,7 @@ import org.jboss.xavier.integrations.migrationanalytics.input.InputDataModel;
 import org.jboss.xavier.integrations.route.dataformat.CustomizedMultipartDataFormat;
 import org.jboss.xavier.integrations.route.model.RHIdentity;
 import org.jboss.xavier.integrations.route.model.cloudforms.CloudFormAnalysis;
+import org.jboss.xavier.integrations.route.model.cloudforms.Datastore;
 import org.jboss.xavier.integrations.route.model.notification.FilePersistedNotification;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -54,15 +55,12 @@ public class MainRouteBuilder extends RouteBuilder {
     
     @Value("${insights.upload.origin}")
     private String origin;
+    
+    @Value("${insights.upload.uri}:/api/ingress/v1/upload")
+    private String uploadUri;
 
     public void configure() {
         getContext().setTracing(true);
-
-/*
-        restConfiguration()
-                .component("servlet")
-                .contextPath("/");
-*/
 
         rest()
                 .post("/upload/{customerID}")
@@ -70,9 +68,7 @@ public class MainRouteBuilder extends RouteBuilder {
                     .bindingMode(RestBindingMode.off)
                     .consumes("multipart/form-data")
                     .produces("")
-                    .to("direct:upload")
-/*                .get("/health")
-                    .to("direct:health")*/;
+                    .to("direct:upload");
 
         from("direct:upload")
                 .unmarshal(new CustomizedMultipartDataFormat())
@@ -109,7 +105,7 @@ public class MainRouteBuilder extends RouteBuilder {
                 .setHeader("x-rh-identity", method(MainRouteBuilder.class, "getRHIdentity(${header.customerid}, ${header.CamelFileName})"))
                 .setHeader("x-rh-insights-request-id", constant(getRHInsightsRequestId()))
                 .removeHeaders("Camel*")
-                .to("http4://" + uploadHost + "/api/ingress/v1/upload")
+                .to("http4://" + uploadHost + uploadUri)
                 .end();
 
         from("kafka:" + kafkaHost + "?topic=platform.upload.testareno&brokers=" + kafkaHost + "&autoOffsetReset=latest&autoCommitEnable=true")
@@ -119,14 +115,10 @@ public class MainRouteBuilder extends RouteBuilder {
                         Message message = exchange.getIn();
                         Integer partitionId = (Integer) message.getHeader(KafkaConstants.PARTITION);
                         String topicName = (String) message.getHeader(KafkaConstants.TOPIC);
+                        
                         if (message.getHeader(KafkaConstants.KEY) != null)
                             messageKey = (String) message.getHeader(KafkaConstants.KEY);
                         Object data = message.getBody();
-
-                        System.out.println("topicName :: " + topicName +
-                                " partitionId :: " + partitionId +
-                                " messageKey :: " + messageKey +
-                                " message :: "+ data + "\n");
                     }
                 })
                 .unmarshal().json(JsonLibrary.Jackson, FilePersistedNotification.class)
@@ -145,7 +137,7 @@ public class MainRouteBuilder extends RouteBuilder {
                 })
                 .filter().method(MainRouteBuilder.class, "filterMessages")
                 .setBody(constant(""))
-                .to("http4://oldhost")
+                .to("http4://host_in_header")
                 .removeHeader("Exchange.HTTP_URI")
                 .convertBodyTo(String.class)
                 .to("direct:parse");
@@ -161,7 +153,7 @@ public class MainRouteBuilder extends RouteBuilder {
                     long totalspace = exchange.getIn().getBody(CloudFormAnalysis.class).getDatacenters()
                             .stream()
                             .flatMap(e-> e.getDatastores().stream())
-                            .mapToLong(t -> t.getTotalSpace())
+                            .mapToLong(Datastore::getTotalSpace)
                             .sum();
                     exchange.getIn().setHeader("numberofhosts",String.valueOf(numberofhosts));
                     exchange.getIn().setHeader("totaldiskspace", String.valueOf(totalspace));
@@ -176,7 +168,6 @@ public class MainRouteBuilder extends RouteBuilder {
                     exchange.getMessage().setBody(inputDataModel);
                 })
                 .log("Message to send to AMQ : ${body}")
-//                .marshal().json()
                 .to("jms:queue:inputDataModel");
     }
 
@@ -186,7 +177,6 @@ public class MainRouteBuilder extends RouteBuilder {
 
     public boolean filterMessages(Exchange exchange) {
         String originHeader = exchange.getIn().getHeader("origin", String.class);
-        System.out.println("Origin header : " + originHeader + " env var : " + origin);
         return (originHeader != null && originHeader.equalsIgnoreCase(origin));
     }
 
@@ -210,7 +200,6 @@ public class MainRouteBuilder extends RouteBuilder {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        System.out.println("---------- RHIdentity : " + rhIdentity_json);
         return Base64.getEncoder().encodeToString(rhIdentity_json.getBytes());
     }
 

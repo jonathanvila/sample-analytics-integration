@@ -4,9 +4,9 @@ import org.jboss.xavier.integrations.jpa.projection.ReportSummary;
 import org.jboss.xavier.integrations.jpa.repository.ReportRepository;
 import org.jboss.xavier.integrations.migrationanalytics.output.ReportDataModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class ReportService
 {
     @Autowired
