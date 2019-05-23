@@ -58,7 +58,7 @@ public class MainRouteBuilder extends RouteBuilder {
     private String origin;
 
     
-    @Value("${insights.upload.uri}:/api/ingress/v1/upload")
+    @Value("${insights.upload.uri:/api/ingress/v1/upload}")
     private String uploadUri;
 
     public void configure() {
