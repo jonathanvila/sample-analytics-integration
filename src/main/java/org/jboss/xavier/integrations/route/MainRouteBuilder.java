@@ -111,18 +111,6 @@ public class MainRouteBuilder extends RouteBuilder {
                 .end();
 
         from("kafka:" + kafkaHost + "?topic=platform.upload.testareno&brokers=" + kafkaHost + "&autoOffsetReset=latest&autoCommitEnable=true")
-                .process(exchange -> {
-                    String messageKey = "";
-                    if (exchange.getIn() != null) {
-                        Message message = exchange.getIn();
-                        Integer partitionId = (Integer) message.getHeader(KafkaConstants.PARTITION);
-                        String topicName = (String) message.getHeader(KafkaConstants.TOPIC);
-                        
-                        if (message.getHeader(KafkaConstants.KEY) != null)
-                            messageKey = (String) message.getHeader(KafkaConstants.KEY);
-                        Object data = message.getBody();
-                    }
-                })
                 .unmarshal().json(JsonLibrary.Jackson, FilePersistedNotification.class)
                 .to("direct:download-from-S3");
 
@@ -139,7 +127,7 @@ public class MainRouteBuilder extends RouteBuilder {
                 })
                 .filter().method(MainRouteBuilder.class, "filterMessages")
                 .setBody(constant(""))
-                .to("http4://host_in_header")
+                .to("http4://oldhost")
                 .removeHeader("Exchange.HTTP_URI")
                 .convertBodyTo(String.class)
                 .to("direct:parse");
