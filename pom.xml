@@ -175,8 +175,9 @@
         </dependency>
 
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.5</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -199,6 +200,11 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>fabric8-arquillian</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test-spring</artifactId>
             <scope>test</scope>
         </dependency>
 

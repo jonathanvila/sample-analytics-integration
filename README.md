@@ -54,14 +54,16 @@ Instructions from https://access.redhat.com/documentation/en-us/red_hat_fuse/7.3
 
 # Manage
 
-## MySQL
-1. To login to MySQL in pod's `Terminal` tab execute `mysql --user userAJL --password sampledb` (pwd: `oRk1CWV21JttTtxP`) 
+## PostgreSQL
+1. Go to Resources -> Secrets page and select `postgresql` secret for the list of the secrets
+1. Select `Reveal Secret` link to get the `database-name` value
+1. Go to PostgreSQL pod's `Terminal` tab to log in doing `psql <database-name>`
 1. To get the report entries persisted execute `select * from report_data_model;`
 1. To DELETE ALL the report entries execute `truncate table report_data_model;`
 ## AMQ Broker
 AMQ Web Console
 ## Camel routes
-
+To enable the `DEBUG` level for logging, please add the environment variable `logging.level.org` (or whatever package you want) with value `DEBUG` to the the `analytics-integration` deployment configuration. 
 # Undeploy
 1. `oc delete all,pvc -l application=migration-analytics -n migration-analytics`
 

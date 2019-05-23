@@ -21,6 +21,7 @@ import org.jboss.xavier.integrations.route.dataformat.CustomizedMultipartDataFor
 import org.jboss.xavier.integrations.route.model.RHIdentity;
 import org.jboss.xavier.integrations.route.model.cloudforms.CloudFormAnalysis;
 import org.jboss.xavier.integrations.route.model.cloudforms.Datastore;
+import org.jboss.xavier.integrations.route.model.cloudforms.Datastore;
 import org.jboss.xavier.integrations.route.model.notification.FilePersistedNotification;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,7 @@ public class MainRouteBuilder extends RouteBuilder {
     
     @Value("${insights.upload.origin}")
     private String origin;
+
     
     @Value("${insights.upload.uri}:/api/ingress/v1/upload")
     private String uploadUri;
