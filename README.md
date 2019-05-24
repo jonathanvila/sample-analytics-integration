@@ -53,7 +53,9 @@ Instructions from https://access.redhat.com/documentation/en-us/red_hat_fuse/7.3
 1. once the build has been successfully done, click on the `Deploy` button
 
 # Manage
-
+## Fuse Console
+Instructions from https://access.redhat.com/documentation/en-us/red_hat_fuse/7.3/html/managing_fuse/access-console#OpenShiftTemplateTbl
+1. `oc new-app -f https://raw.githubusercontent.com/jboss-fuse/application-templates/application-templates-2.1.fuse-730065-redhat-00002/fis-console-namespace-template.json`
 ## PostgreSQL
 1. Go to Resources -> Secrets page and select `postgresql` secret for the list of the secrets
 1. Select `Reveal Secret` link to get the `database-name` value
